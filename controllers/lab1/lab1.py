@@ -4,8 +4,9 @@ from enum import Enum
 # time in [ms] of a simulation step
 TIME_STEP = 64
 MAX_SPEED = 6.28
+TRAVEL_SPEED = 2 # Don't go faster, it breaks other things
 
-WALL_FOLLOW_DIST = 85
+WALL_FOLLOW_DIST = 130
 
 # create the Robot instance.
 robot = Robot()
@@ -35,8 +36,8 @@ rightMotor.setPosition(float('inf'))
 leftMotor.setVelocity(0.0)
 rightMotor.setVelocity(0.0)
 
-vL = 1
-vR = 1
+vL = TRAVEL_SPEED
+vR = TRAVEL_SPEED
 
 
 class State(Enum):
@@ -44,7 +45,8 @@ class State(Enum):
     TURN_R = 2
     TURN_180 = 3
     FOLLOW_R = 4
-    STOP = 5
+    TURN_L = 5
+    STOP = 6
 
 curr_state = State.FOLLOW_L
 
@@ -59,16 +61,20 @@ while robot.step(TIME_STEP) != -1:
     lsValues = []
     for i in range(8):
         lsValues.append(ls[i].getValue())
+        
+    print(psValues[5])
 
     match curr_state.name:
         case "FOLLOW_L":
-            coeff = (WALL_FOLLOW_DIST - psValues[5]) * 0.0005
-            vL = 1 - coeff
-            vR = 1 + coeff
+            coeff = (WALL_FOLLOW_DIST - psValues[5]) * 0.005
+            vL = TRAVEL_SPEED - coeff
+            vR = TRAVEL_SPEED + coeff
             
             if(psValues[7] > 80 and psValues[0] > 80): 
                 print("TURN_R now")
                 curr_state = State.TURN_R
+            
+            # TODO check light sensors & transition to 180 turn
             
         case "TURN_R":
             vL = 1
@@ -81,18 +87,41 @@ while robot.step(TIME_STEP) != -1:
             pass
             
         case "TURN_180":
+            # TODO needs to be implemented
             pass
             
         case "FOLLOW_R":
+            coeff = (WALL_FOLLOW_DIST - psValues[2]) * 0.005
+            vL = TRAVEL_SPEED + coeff
+            vR = TRAVEL_SPEED - coeff
+            
+            if(psValues[7] > 80 and psValues[0] > 80): 
+                print("TURN_L now")
+                curr_state = State.TURN_L
+                
+                
+            # TODO check light sensors & transition to stop
+                
+                
+        case "TURN_L": # Necessary for wall-following on the right
+            vL = -1
+            vR = 1
+            
+            if(psValues[4] > 80 and psValues[3] > 80): 
+                print("FOLLOW_L now")
+                curr_state = State.FOLLOW_R
+            
             pass
             
         case "STOP":
+            # TODO needs to be implemented
             pass
             
         case _:
             pass
             
-            
+    
+    # Clamp motor outputs
     if(vL > MAX_SPEED): vL = MAX_SPEED
     if(vL < -MAX_SPEED): vL = MAX_SPEED
     if(vR > MAX_SPEED): vR = MAX_SPEED
