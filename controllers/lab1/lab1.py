@@ -6,6 +6,12 @@ TIME_STEP = 64
 MAX_SPEED = 6.28
 TRAVEL_SPEED = 2 # Don't go faster, it breaks other things
 
+
+# Wall Follow PID
+FOLLOW_P = 0.0065
+FOLLOW_D = 0.03
+
+
 WALL_FOLLOW_DIST = 130
 
 # create the Robot instance.
@@ -50,6 +56,8 @@ class State(Enum):
 
 curr_state = State.FOLLOW_L
 
+prev_L_err = 0
+prev_R_err = 0
 
 # feedback loop: step simulation until receiving an exit event
 while robot.step(TIME_STEP) != -1:
@@ -66,9 +74,12 @@ while robot.step(TIME_STEP) != -1:
 
     match curr_state.name:
         case "FOLLOW_L":
-            coeff = (WALL_FOLLOW_DIST - psValues[5]) * 0.005
+            err = WALL_FOLLOW_DIST - psValues[5]
+            coeff = (err * FOLLOW_P) + ((err - prev_L_err) * FOLLOW_D)
             vL = TRAVEL_SPEED - coeff
             vR = TRAVEL_SPEED + coeff
+            
+            prev_L_err = err
             
             if(psValues[7] > 80 and psValues[0] > 80): 
                 print("TURN_R now")
@@ -91,9 +102,12 @@ while robot.step(TIME_STEP) != -1:
             pass
             
         case "FOLLOW_R":
-            coeff = (WALL_FOLLOW_DIST - psValues[2]) * 0.005
+            err = WALL_FOLLOW_DIST - psValues[5]
+            coeff = (err * FOLLOW_P) + ((err - prev_R_err) * FOLLOW_D)
             vL = TRAVEL_SPEED + coeff
             vR = TRAVEL_SPEED - coeff
+            
+            prev_R_err = err
             
             if(psValues[7] > 80 and psValues[0] > 80): 
                 print("TURN_L now")
