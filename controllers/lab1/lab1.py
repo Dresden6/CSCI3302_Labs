@@ -16,6 +16,9 @@ FOLLOW_D = 0.03
 
 WALL_FOLLOW_DIST = 130
 
+TURN_180_STEPS=67
+turn_counter=0
+
 # create the Robot instance.
 robot = Robot()
 
@@ -72,7 +75,7 @@ while robot.step(TIME_STEP) != -1:
     for i in range(8):
         lsValues.append(ls[i].getValue())
         
-    print(psValues[5])
+    # print(psValues[5])
 
     match curr_state.name:
         case "FOLLOW_L":
@@ -87,8 +90,8 @@ while robot.step(TIME_STEP) != -1:
                 print("TURN_R now")
                 curr_state = State.TURN_R
             
-            if (lsValues[0] > THRESHOLD and lsValues[1] > THRESHOLD and lsValues[2] > THRESHOLD and
-                lsValues[5] > THRESHOLD and lsValues[6] > THRESHOLD and lsValues[7] > THRESHOLD):
+            if (lsValues[0] < THRESHOLD and lsValues[1] < THRESHOLD and lsValues[2] < THRESHOLD and
+                lsValues[5] < THRESHOLD and lsValues[6] < THRESHOLD and lsValues[7] < THRESHOLD):
                 print("TURN_180 now")
                 curr_state = State.TURN_180
             
@@ -105,15 +108,17 @@ while robot.step(TIME_STEP) != -1:
         case "TURN_180":
             vL = 1
             vR = -1
-            
-            if(psValues[2]>90):
+            turn_counter += 1
+
+            if turn_counter >= TURN_180_STEPS:
+                turn_counter = 0
                 print("FOLLOW_R now")
-                curr_state=State.FOLLOW_R
-                            
+                curr_state = State.FOLLOW_R
+            
             pass
             
         case "FOLLOW_R":
-            err = WALL_FOLLOW_DIST - psValues[5]
+            err = WALL_FOLLOW_DIST - psValues[2]
             coeff = (err * FOLLOW_P) + ((err - prev_R_err) * FOLLOW_D)
             vL = TRAVEL_SPEED + coeff
             vR = TRAVEL_SPEED - coeff
@@ -125,8 +130,8 @@ while robot.step(TIME_STEP) != -1:
                 curr_state = State.TURN_L
                 
                 
-            if (lsValues[0] > THRESHOLD and lsValues[1] > THRESHOLD and lsValues[2] > THRESHOLD and
-                lsValues[5] > THRESHOLD and lsValues[6] > THRESHOLD and lsValues[7] > THRESHOLD):
+            if (lsValues[0] < THRESHOLD and lsValues[1] < THRESHOLD and lsValues[2] < THRESHOLD and
+                lsValues[5] < THRESHOLD and lsValues[6] < THRESHOLD and lsValues[7] < THRESHOLD):
                 print("STOP now")
                 curr_state = State.STOP
                 
