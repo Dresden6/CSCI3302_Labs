@@ -71,7 +71,7 @@ while robot.step(SIM_TIMESTEP) != -1:
 
     # TODO: Uncomment to see the ground sensor values!
     # TODO: But when you don't need it, please comment it so you have a clean terminal.
-    # print(gsr)
+    print(gsr)
 
     match curr_state.name:
 
@@ -80,9 +80,15 @@ while robot.step(SIM_TIMESTEP) != -1:
     # TODO: Save the speed within XZ-plane to EPUCK_MAX_WHEEL_SPEED after measuring it.
 
         case "speed_measurement":
+            vL = MAX_SPEED
+            vR = MAX_SPEED
             
-            pass
-
+            if(gsr[0] < 500 and gsr[2] < 500):
+                vL = 0
+                vR = 0
+                curr_state = State.line_follower
+                
+                
 
     # Part 2
     # TODO: Implement Line Following under state "line_follower"
