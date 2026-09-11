@@ -6,6 +6,8 @@ TIME_STEP = 64
 MAX_SPEED = 6.28
 TRAVEL_SPEED = 2 # Don't go faster, it breaks other things
 
+# light detection threshold
+THRESHOLD=750
 
 # Wall Follow PID
 FOLLOW_P = 0.0065
@@ -85,7 +87,10 @@ while robot.step(TIME_STEP) != -1:
                 print("TURN_R now")
                 curr_state = State.TURN_R
             
-            # TODO check light sensors & transition to 180 turn
+            if (lsValues[0] > THRESHOLD and lsValues[1] > THRESHOLD and lsValues[2] > THRESHOLD and
+                lsValues[5] > THRESHOLD and lsValues[6] > THRESHOLD and lsValues[7] > THRESHOLD):
+                print("TURN_180 now")
+                curr_state = State.TURN_180
             
         case "TURN_R":
             vL = 1
@@ -98,7 +103,13 @@ while robot.step(TIME_STEP) != -1:
             pass
             
         case "TURN_180":
-            # TODO needs to be implemented
+            vL = 1
+            vR = -1
+            
+            if(psValues[2]>90):
+                print("FOLLOW_R now")
+                curr_state=State.FOLLOW_R
+                            
             pass
             
         case "FOLLOW_R":
@@ -114,7 +125,10 @@ while robot.step(TIME_STEP) != -1:
                 curr_state = State.TURN_L
                 
                 
-            # TODO check light sensors & transition to stop
+            if (lsValues[0] > THRESHOLD and lsValues[1] > THRESHOLD and lsValues[2] > THRESHOLD and
+                lsValues[5] > THRESHOLD and lsValues[6] > THRESHOLD and lsValues[7] > THRESHOLD):
+                print("STOP now")
+                curr_state = State.STOP
                 
                 
         case "TURN_L": # Necessary for wall-following on the right
@@ -128,7 +142,8 @@ while robot.step(TIME_STEP) != -1:
             pass
             
         case "STOP":
-            # TODO needs to be implemented
+            vR=0
+            vL=0
             pass
             
         case _:
