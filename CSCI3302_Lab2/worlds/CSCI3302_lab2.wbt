@@ -41,7 +41,7 @@ RectangleArena {
   wallHeight 0.05
 }
 DEF EPUCK E-puck {
-  translation -0.280038 -6.41276e-05 -0.2
+  translation -0.280038 -6.41276e-05 0.1
   rotation 0.5773136019637692 0.5773666019272277 0.5773706019244699 -2.0944553071795866
   controller "lab2_controller"
   groundSensorsSlot [
