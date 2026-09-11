@@ -3,7 +3,14 @@
 # You may need to import some classes of the controller module.
 import math
 from controller import Robot, Motor, DistanceSensor
+from enum import Enum
 # import os
+
+class State(Enum):
+    speed_measurement = 1
+    line_follower = 2
+
+curr_state = State.speed_measurement
 
 # Ground Sensor Measurements under this threshold are black
 # measurements above this threshold can be considered white.
@@ -66,9 +73,16 @@ while robot.step(SIM_TIMESTEP) != -1:
     # TODO: But when you don't need it, please comment it so you have a clean terminal.
     # print(gsr)
 
+    match curr_state.name:
+
     # Part 1
     # TODO: Implement Maximum Speed Measurement under state "speed_measurement"
     # TODO: Save the speed within XZ-plane to EPUCK_MAX_WHEEL_SPEED after measuring it.
+
+        case "speed_measurement":
+            
+            pass
+
 
     # Part 2
     # TODO: Implement Line Following under state "line_follower"
@@ -86,7 +100,12 @@ while robot.step(SIM_TIMESTEP) != -1:
     #
     # 4) Disable all console output to simulate the robot superfast
     # and test the robustness of your approach.
-    #
+    
+        case "line_follower":
+        
+            pass
+    
+    
     # Hints for update_odometry:
     #
     # 1) Divide vL/vR by MAX_SPEED to normalize, then multiply with
