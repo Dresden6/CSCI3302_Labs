@@ -33,7 +33,7 @@ robot = Robot()
 # ePuck Constants
 EPUCK_AXLE_DIAMETER = 0.053  # ePuck's wheels are 53mm apart.
 # TODO: set the ePuck wheel speed in m/s after measuring the speed (Part 1)
-EPUCK_MAX_WHEEL_SPEED = 0
+EPUCK_MAX_WHEEL_SPEED = 0.124305412371
 MAX_SPEED = 6.28
 
 # get the time step of the current world.
@@ -62,6 +62,10 @@ for i in range(10):
 vL = 0
 vR = 0
 
+
+start_time = robot.getTime()
+
+
 # Main Control Loop:
 while robot.step(SIM_TIMESTEP) != -1:
 
@@ -71,7 +75,7 @@ while robot.step(SIM_TIMESTEP) != -1:
 
     # TODO: Uncomment to see the ground sensor values!
     # TODO: But when you don't need it, please comment it so you have a clean terminal.
-    print(gsr)
+    # print(gsr)
 
     match curr_state.name:
 
@@ -82,11 +86,13 @@ while robot.step(SIM_TIMESTEP) != -1:
         case "speed_measurement":
             vL = MAX_SPEED
             vR = MAX_SPEED
-            
+           
             if(gsr[0] < 500 and gsr[2] < 500):
                 vL = 0
                 vR = 0
                 curr_state = State.line_follower
+                
+                print("End Time: " + str(robot.getTime() - start_time))
                 
                 
 
@@ -136,6 +142,6 @@ while robot.step(SIM_TIMESTEP) != -1:
     # 2) Use the pose when you encounter the line last
     # for best results
 
-    print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
+    # print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
     leftMotor.setVelocity(vL)
     rightMotor.setVelocity(vR)
