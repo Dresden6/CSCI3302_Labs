@@ -15,7 +15,7 @@ curr_state = State.speed_measurement
 # Ground Sensor Measurements under this threshold are black
 # measurements above this threshold can be considered white.
 # TODO: Set a reasonable threshold that separates "line detected" from "no line detected"
-GROUND_SENSOR_THRESHOLD = 500
+GROUND_SENSOR_THRESHOLD = 600
 
 # These are your pose values that you will update by solving the odometry equations
 pose_x = 0
@@ -35,6 +35,7 @@ EPUCK_AXLE_DIAMETER = 0.053  # ePuck's wheels are 53mm apart.
 # TODO: set the ePuck wheel speed in m/s after measuring the speed (Part 1)
 EPUCK_MAX_WHEEL_SPEED = 0.124305412371
 MAX_SPEED = 6.28
+MAX_SPEED_LESS=MAX_SPEED*0.4
 
 # get the time step of the current world.
 SIM_TIMESTEP = int(robot.getBasicTimeStep())
@@ -68,6 +69,7 @@ start_time = robot.getTime()
 vL_mps_last = 0
 vR_mps_last = 0
 
+line_time=0.0
 
 # Main Control Loop:
 while robot.step(SIM_TIMESTEP) != -1:
@@ -117,19 +119,19 @@ while robot.step(SIM_TIMESTEP) != -1:
     # and test the robustness of your approach.
     
         case "line_follower":
-            
+          
             if(gsr[1] < GROUND_SENSOR_THRESHOLD):
                 vL = MAX_SPEED
                 vR = MAX_SPEED
             elif(gsr[0] < GROUND_SENSOR_THRESHOLD):
-                vL = -MAX_SPEED / 2
-                vR = MAX_SPEED
+                vL = -MAX_SPEED_LESS
+                vR = MAX_SPEED_LESS
             elif(gsr[2] < GROUND_SENSOR_THRESHOLD):
-                vL = MAX_SPEED
-                vR = -MAX_SPEED / 2
+                vL = MAX_SPEED_LESS
+                vR = -MAX_SPEED_LESS
             else:
-                vL = -MAX_SPEED
-                vR = MAX_SPEED
+                vL = -MAX_SPEED_LESS
+                vR = MAX_SPEED_LESS
                
     
     # Hints for update_odometry:
@@ -147,19 +149,22 @@ while robot.step(SIM_TIMESTEP) != -1:
     # about calculating odometry in the world coordinate system of the
     # Webots simulator first (x points down, y points right)
     
-    
-
-    delta_time = SIM_TIMESTEP / 1000.0
-    
-    delta_L = vL_mps_last * delta_time
-    delta_R = vR_mps_last * delta_time
-    
-    
     # TODO Implement the 3 equations
     
-    
-    vL_mps_last = (vL / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED
-    vR_mps_last = (vR / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED
+            delta_time = SIM_TIMESTEP / 1000.0
+                
+            forward_speed=(vL_mps_last+vR_mps_last)/2.0
+
+            x_dot=math.cos(pose_theta)*forward_speed
+            y_dot=math.sin(pose_theta)*forward_speed
+            theta_dot=(vR_mps_last-vL_mps_last)/EPUCK_AXLE_DIAMETER
+
+            pose_x += x_dot*delta_time
+            pose_y += y_dot*delta_time
+            pose_theta += theta_dot * delta_time
+
+            vL_mps_last = (vL / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED
+            vR_mps_last = (vR / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED 
 
     # Part 3
     # TODO: Implement Loop Closure also under state "line_follower" to reset pose when robot passes over the Start Line.
@@ -170,7 +175,17 @@ while robot.step(SIM_TIMESTEP) != -1:
     # 2) Use the pose when you encounter the line last
     # for best results
 
+            if(gsr[0] < GROUND_SENSOR_THRESHOLD and gsr[1] < GROUND_SENSOR_THRESHOLD and gsr[2]<GROUND_SENSOR_THRESHOLD):
+                    line_time+=SIM_TIMESTEP/1000.0
+            else:
+                line_time=0.0
 
-    # print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
+            if line_time>0.1:
+                    pose_x=0
+                    pose_y=0
+                    pose_theta=0
+
+
+    print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
     leftMotor.setVelocity(vL)
     rightMotor.setVelocity(vR)
