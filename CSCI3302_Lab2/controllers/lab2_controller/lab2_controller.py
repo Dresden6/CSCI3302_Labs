@@ -35,7 +35,7 @@ EPUCK_AXLE_DIAMETER = 0.053  # ePuck's wheels are 53mm apart.
 # TODO: set the ePuck wheel speed in m/s after measuring the speed (Part 1)
 EPUCK_MAX_WHEEL_SPEED = 0.124305412371
 MAX_SPEED = 6.28
-MAX_SPEED_LESS=MAX_SPEED*0.4
+MAX_SPEED_LESS=MAX_SPEED*0.2
 
 # get the time step of the current world.
 SIM_TIMESTEP = int(robot.getBasicTimeStep())
@@ -121,8 +121,8 @@ while robot.step(SIM_TIMESTEP) != -1:
         case "line_follower":
           
             if(gsr[1] < GROUND_SENSOR_THRESHOLD):
-                vL = MAX_SPEED
-                vR = MAX_SPEED
+                vL = MAX_SPEED/3
+                vR = MAX_SPEED/3
             elif(gsr[0] < GROUND_SENSOR_THRESHOLD):
                 vL = -MAX_SPEED_LESS
                 vR = MAX_SPEED_LESS
@@ -162,6 +162,9 @@ while robot.step(SIM_TIMESTEP) != -1:
             pose_x += x_dot*delta_time
             pose_y += y_dot*delta_time
             pose_theta += theta_dot * delta_time
+            
+            if(pose_theta < 0): pose_theta += 2 * math.pi
+            pose_theta = pose_theta % (2 * math.pi)
 
             vL_mps_last = (vL / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED
             vR_mps_last = (vR / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED 
