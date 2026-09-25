@@ -37,6 +37,10 @@ EPUCK_MAX_WHEEL_SPEED = 0.124305412371
 MAX_SPEED = 6.28
 MAX_SPEED_LESS=MAX_SPEED*0.2
 
+INITIAL_WORLD_X = -0.28
+INITIAL_WORLD_Z = 0.188
+INITIAL_HEADING = math.pi / 2.0
+
 # get the time step of the current world.
 SIM_TIMESTEP = int(robot.getBasicTimeStep())
 
@@ -70,6 +74,10 @@ vL_mps_last = 0
 vR_mps_last = 0
 
 line_time=0.0
+
+world_x = INITIAL_WORLD_X
+world_z = INITIAL_WORLD_Z
+world_heading = INITIAL_HEADING
 
 # Main Control Loop:
 while robot.step(SIM_TIMESTEP) != -1:
@@ -121,8 +129,8 @@ while robot.step(SIM_TIMESTEP) != -1:
         case "line_follower":
           
             if(gsr[1] < GROUND_SENSOR_THRESHOLD):
-                vL = MAX_SPEED/3
-                vR = MAX_SPEED/3
+                vL = MAX_SPEED/2.5
+                vR = MAX_SPEED/2.5
             elif(gsr[0] < GROUND_SENSOR_THRESHOLD):
                 vL = -MAX_SPEED_LESS
                 vR = MAX_SPEED_LESS
@@ -163,8 +171,7 @@ while robot.step(SIM_TIMESTEP) != -1:
             pose_y += y_dot*delta_time
             pose_theta += theta_dot * delta_time
             
-            if(pose_theta < 0): pose_theta += 2 * math.pi
-            pose_theta = pose_theta % (2 * math.pi)
+            pose_theta = math.atan2(math.sin(pose_theta), math.cos(pose_theta))
 
             vL_mps_last = (vL / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED
             vR_mps_last = (vR / MAX_SPEED) * EPUCK_MAX_WHEEL_SPEED 
@@ -187,8 +194,13 @@ while robot.step(SIM_TIMESTEP) != -1:
                     pose_x=0
                     pose_y=0
                     pose_theta=0
+                    
+    world_x = INITIAL_WORLD_X + math.cos(INITIAL_HEADING) * pose_x + math.sin(INITIAL_HEADING) * pose_y
+    world_z = INITIAL_WORLD_Z + math.sin(INITIAL_HEADING) * pose_x - math.cos(INITIAL_HEADING) * pose_y
+    world_heading = INITIAL_HEADING - pose_theta
+    world_heading = math.atan2(math.sin(world_heading), math.cos(world_heading))
 
-
-    print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
+    # print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
+    print("Current pose: [%5f, %5f, %5f]" % (world_x, world_z, world_heading))
     leftMotor.setVelocity(vL)
     rightMotor.setVelocity(vR)
