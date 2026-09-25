@@ -49,7 +49,7 @@ compass.enable(SIM_TIMESTEP)
 # TODO: Find waypoints to navigate around the arena while avoiding obstacles
 # Use shift+drag on the ping pong marker in the simulator to find good waypoints.
 # Add them as (x, y) tuples. You need at least one waypoint before running!
-waypoints = [] # e.g. [(-0.1, -0.4), (0.3, -0.4), ...]
+waypoints = [(-0.155,-0.195), (-0.26,-0.257), (-0.243, -0.37), (-0.14, -0.38), (-0.0295, -0.386), (-0.07, -0.393), (0.187, -0.392), (0.284, -0.385), (0.285, -0.281), (0.15, -0.198), (0.04, -0.113), (0.0301, 0.0381), (0.125, 0.122), (0.232, 0.188), (0.31, 0.248), (0.241, 0.322), (0.127, 0.389), (-0.0392, 0.396), (-0.185, 0.393), (-0.273, 0.381), (-0.277, 0.302), (-0.233, 0.215), (-0.233, 0.0729), (-0.272, 0.016),(-0.264, -0.13)] # e.g. [(-0.1, -0.4), (0.3, -0.4), ...]
 # Index indicating which waypoint the robot is reaching next
 index = 0
 
