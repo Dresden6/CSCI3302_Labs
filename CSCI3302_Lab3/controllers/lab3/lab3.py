@@ -14,6 +14,7 @@ robot = Supervisor()
 
 # ePuck Constants
 EPUCK_AXLE_DIAMETER = 0.053 # ePuck's wheels are 53mm apart.
+EPUCK_WHEEL_DIAMETER = 0.0205
 EPUCK_MAX_WHEEL_SPEED = 0.1257 # ePuck wheel speed in m/s
 MAX_SPEED = 6.28
 
@@ -78,6 +79,22 @@ while robot.step(SIM_TIMESTEP) != -1:
     pose_theta = np.arctan2(compass.getValues()[0], compass.getValues()[1])
     
     # TODO: controller
+    
+    
+    # T_inverse maps world coordinates to robot coordinates
+    T_inverse = np.array([
+    [np.cos(pose_theta), np.sin(pose_theta), 0], 
+    [-np.sin(pose_theta), np.cos(pose_theta), 0], 
+    [0, 0, 1]
+    ])
+    
+    # Goal (x, y, theta) In robot coordinate space:
+    target = T_inverse @ np.array([[waypoints[index][0] - pose_x], [waypoints[index][1] - pose_y], [pose_theta]])
+    
+    vL = (target[0] - (target[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_AXLE_DIAMETER
+       
+    
+    print(target)
     
     print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
     leftMotor.setVelocity(vL)
