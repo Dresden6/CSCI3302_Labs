@@ -4,6 +4,7 @@
 import math
 from controller import Robot, Motor, DistanceSensor, Supervisor
 import numpy as np
+from enum import Enum
 
 class State(Enum):
     turn_drive_turn_control = 1
@@ -89,8 +90,8 @@ while robot.step(SIM_TIMESTEP) != -1:
 
         # Part 2
         case "turn_drive_turn_control":
-    
-    
+            
+            pass
     
     
         # Part 3
@@ -108,11 +109,13 @@ while robot.step(SIM_TIMESTEP) != -1:
             delta_theta = np.arctan2(delta_x, delta_y) - pose_theta
             
             # Put error into robot coordinate space:
-            target = T_inverse @ np.array([[delta_x], [delta_y], [delta_theta]])
+            error = T_inverse @ np.array([[delta_x], [delta_y], [delta_theta]])
+            
+            print(error)
             
             # Calculate wheel speeds from coordinates (IK)
-            vL = ((target[0] - (target[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0]
-            vR = ((target[0] + (target[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0]
+            vL = ((error[0] - (error[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0] * 0.1
+            vR = ((error[0] + (error[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0] * 0.1
             
 
     
