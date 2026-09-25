@@ -10,7 +10,7 @@ class State(Enum):
     turn_drive_turn_control = 1
     proportional_controller = 2
 
-curr_state = State.turn_drive_turn_control
+curr_state = State.proportional_controller
 
 pose_x = 0
 pose_y = 0
@@ -106,7 +106,7 @@ while robot.step(SIM_TIMESTEP) != -1:
             # Calculate distance (error) to target in world space
             delta_x = waypoints[index][0] - pose_x
             delta_y = waypoints[index][1] - pose_y
-            delta_theta = np.arctan2(delta_x, delta_y) - pose_theta
+            delta_theta = np.arctan2(delta_y, delta_x) - pose_theta
             
             # Put error into robot coordinate space:
             error = T_inverse @ np.array([[delta_x], [delta_y], [delta_theta]])
@@ -115,9 +115,14 @@ while robot.step(SIM_TIMESTEP) != -1:
             
             # Calculate wheel speeds from coordinates (IK)
             vL = ((error[0] - (error[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0] * 0.1
-            vR = ((error[0] + (error[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0] * 0.1
+            vR = ((error[0] + (error[2] * EPUCK_AXLE_DIAMETER)/2) / EPUCK_WHEEL_RADIUS)[0] * 0.5
             
 
+    # Clamp motor outputs
+    if(vL > MAX_SPEED): vL = MAX_SPEED
+    if(vL < -MAX_SPEED): vL = MAX_SPEED
+    if(vR > MAX_SPEED): vR = MAX_SPEED
+    if(vR < -MAX_SPEED): vR = MAX_SPEED
     
     print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
     leftMotor.setVelocity(vL)
