@@ -14,7 +14,7 @@ robot = Supervisor()
 
 # ePuck Constants
 EPUCK_AXLE_DIAMETER = 0.053 # ePuck's wheels are 53mm apart.
-EPUCK_WHEEL_DIAMETER = 0.0205
+EPUCK_WHEEL_RADIUS = 0.0205
 EPUCK_MAX_WHEEL_SPEED = 0.1257 # ePuck wheel speed in m/s
 MAX_SPEED = 6.28
 
